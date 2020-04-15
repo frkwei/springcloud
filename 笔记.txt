@@ -1,0 +1,77 @@
+1。dependencyManagement和dependencies区别
+	dependencyManagement：通常会在一个组织或者项目的最顶层的父POM中看到dependencyManagement元素
+
+2。热部署工具：devtools
+
+3。lombok：
+	@Data 整合@ToString @EqualsAndHashCode @Getter @Setter @RequiredArgsConstructor
+	@RequiredArgsConstructor： 生成包含final和@NonNull注解的成员变量的构造器；
+	@AllArgsConstructor: 生成全参构造器
+	@NoArgsConstructor: 生成无参构造器；
+
+4。使用restTemplate.postForObject(PAYMENT_URL+"/payment/add", payment, CommonResult.class);传递对象时，需要在接收方的参数中配@RequestBody注解，否则接收不到参数
+
+5。docker进入zookeeper服务器：
+	1）docker exec -it c21854943ab3 bash
+	2）ls
+	3）./zkServer.sh start
+	4）./zkCli.sh
+	5）[ls /]|[ls /zookeeper]|[ls /services]|[get /zookeeper]
+	6）ls /services/cloud-payment-service（出现流水号）
+	7）ls /services/cloud-payment-service/流水号
+	8）get /services/cloud-payment-service/流水号
+	
+6。@LoadBalanced为RestTemplate开启负载均衡
+
+7。restTemplate的get/postForObject返回josn串，get/postForEntity返回ResponseEntity对象
+
+8。Ribobon 自带的常用负载均衡算法：
+	com.netflix.loadbalancer.RundRobinRule 轮询
+	com.netflix.loadbalancer.RandomRule	随机
+	com.netflix.loadbalancer.RetryRule 先按照RundRobinRule的策略获取服务，如果获取服务失败则在指定时间内会进行重试
+	WeightResponseTimeRule 对RundRobinRule的扩展，响应速度越快的实例选择权重越大，越容易被选择
+	BestAvailableRule 会先过滤掉由于多次访问故障而处于断路器跳闸状态的服务，然后选择一个并发量最小的服务
+	AvailabilityFilteringRule 先过滤掉故障的实例，再选择并发小的实例
+	ZoneAvoidanceRule 默认规则，复合判断server所在区域的性能和server的可用性选择服务器 
+
+9。使用ribbon自定义负载均衡算法：这个自定义配置类不能放在@ComponentScan所扫描的当前包下以及子包下（可以生效），否则我们自定义的这个配置类就会被所有的Ribbon客户端所共享,达不到特殊化定制的目的了。
+
+10。自定义配置类类，返回算法实现类，主启动类加注解：@RibbonClient(name="CLOUD-PAYMENT-SERVICE",configuration = MyRule1.class)
+
+11。  @Component	最普通的组件，可以被注入到spring容器进行管理
+	@Repository	作用于持久层
+	@Service	作用于业务逻辑层
+	@Controller	作用于表现层（spring-mvc的注解）
+
+12。openFeign默认使用ribbon的超时设置：
+	# 请求连接的超时时间
+	ribbon.ConnectTimeout=2000
+	# 请求处理的超时时间
+	ribbon.ReadTimeout=5000
+
+13。服务降级的三种方法
+	1）@HystrixCommand(fallbackMethod = "fallbackMethod2",commandProperties = {@HystrixProperty(name="execution.isolation.thread.timeoutInMilliseconds",value="200")})
+	2）在类上配置全局方法@DefaultProperties(defaultFallback = "globalMethod")，并为单一方法添加@HystrixCommand
+	3）为@FeignClient注解添加,fallback = PaymentHystrixFallbackService.class属性，实现该接口并重写对应的业务方法作为fallback方法,feign.hystrix.enabled配置用于控制这个
+	
+14。对于客户端的服务降级来说@FeignClient(value = "CLOUD-PAYMENT-HYSTRIX-SERVICE",fallback = PaymentHystrixFallbackService.class)优先于@HystrixCommand
+
+15。HystrixCommandProperties类记录了所有hystrix的配置参数的默认值
+
+16。熔断的三种类型：
+	1）熔断打开：请求不再进行调用当前服务，内部设置时钟，一般为MTTR（平均故障处理时间），当打开时长达到所设的时钟则进入半熔断状态
+	2）熔断关闭：熔断关闭不会对服务进行熔断
+	3）部分请求根据规则调用当前服务，如果请求成功且符合规则，则认为当前服务恢复正常，关闭熔断
+	
+	
+17。hystrix参数参考HystrixAllProprties
+
+18。启动gateway时，以下报错表示需移除spring-boot-starter-web依赖
+		Parameter 0 of method modifyResponseBodyGatewayFilterFactory in org.springframework.cloud.gateway.config.GatewayAutoConfiguration required a bean of type 'org.springframework.http.codec.ServerCodecConfigurer' that could not be found.
+   		Spring MVC found on classpath, which is incompatible with Spring Cloud Gateway at thistime. Please remove spring - boot- starter- -web dependency.
+   		
+19。gateway需要修改动态路由（负载均衡）策略时，可添加配置
+		cloud-payment-service: #修改ribbon的负载均衡策略，这是服务名
+		  ribbon:
+		    #listOfServers: localhost:8001, localhost:8002
+		    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule  
