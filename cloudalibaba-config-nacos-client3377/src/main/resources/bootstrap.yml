@@ -1,0 +1,13 @@
+#server.port=8081
+#spring.application.name=nacos-producer
+#spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
+#management.endpoints.web.exposure.include=*
+
+
+server:  port: 3377
+spring:  application:    name: cloudalibaba-nacos-config-client
+  cloud:    nacos:      discovery:        server-addr: 127.0.0.1:8848
+      config:        server-addr: 127.0.0.1:8848
+        file-extension: yaml
+        group: TEST_GROUP
+        namespace: 118f384a-b185-482f-a4e0-84398ecdd74e 

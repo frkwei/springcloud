@@ -74,4 +74,17 @@
 		cloud-payment-service: #修改ribbon的负载均衡策略，这是服务名
 		  ribbon:
 		    #listOfServers: localhost:8001, localhost:8002
-		    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule  
+		    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule 
+		    
+20。config客户端自动刷新，需要：
+	1）引入actuator
+	2）客户端中增加配置：
+				management:
+				  endpoints:
+				    web:
+				      exposure:
+				        include: "*"
+	3）controller类中增加@RefreshScope注解
+	4）手动发送post请求 curl -X POST "http://localhost:3355/actuator/refresh" 
+	
+21。nacos目前不支持MySQL8

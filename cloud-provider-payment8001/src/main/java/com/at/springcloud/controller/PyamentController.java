@@ -16,6 +16,7 @@ import com.at.springcloud.entities.CommonResult;
 import com.at.springcloud.entities.Payment;
 import com.at.springcloud.service.PaymentService;
 
+import cn.hutool.core.util.IdUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -79,5 +80,10 @@ public class PyamentController {
 	@GetMapping(value="/payment/get/geteway/get/{id}")
 	public String getGateway2(@PathVariable Integer id) {
 		return this.serverPort+"  get到了id："+id;
+	}
+	
+	@GetMapping(value="/payment/zipkin")
+	public String getZipkin() {
+		return this.serverPort+" "+IdUtil.simpleUUID();
 	}
 }

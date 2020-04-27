@@ -22,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OrderController {
 	//public static final String PAYMENT_URL = "http://localhost:8001";
-	//public static final String PAYMENT_URL = "http://CLOUD-PAYMENT-SERVICE";
-	public static final String PAYMENT_URL = "http://CLOUD-GATEWAY";
+	public static final String PAYMENT_URL = "http://CLOUD-PAYMENT-SERVICE";
+	//public static final String PAYMENT_URL = "http://CLOUD-GATEWAY";
 	//public static final String PAYMENT_URL = "http://localhost:9527";
 	
 	
@@ -66,5 +66,10 @@ public class OrderController {
 	public String getGateway2(@PathVariable Integer id) {
 		String a = "?uname=1";
 		return restTemplate.getForObject(PAYMENT_URL+"/payment/get/geteway/get/"+12+a,String.class);
+	}
+	
+	@GetMapping(value="/payment/zipkin")
+	public String getZipkin() {
+		return restTemplate.getForObject(PAYMENT_URL+"/payment/zipkin",String.class);
 	}
 }
